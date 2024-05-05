@@ -2,6 +2,8 @@ const express = require("express");
 const port = 3000;
 const app = express();
 const userModel = require("./models/user");
+const postModel = require("./models/post");
+
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
@@ -19,9 +21,29 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.get("/profile", isLoggedIn, (req, res) => {
-  res.render('login');
+app.get("/profile", isLoggedIn, async(req, res) => {
+  let user = await userModel.findOne({email:req.user.email}).populate('post')
+  
+  res.render('profile' , {user});
 });
+
+app.post("/post", isLoggedIn, async (req, res) => {
+  try {
+    let user = await userModel.findOne({ email: req.user.email });
+    let { postContent } = req.body; // Assuming the textarea name is postContent
+    let post = await postModel.create({
+      user: user._id,
+      content: postContent // Use the content from the request body
+    });
+    user.post.push(post._id); // Assuming the user schema has a posts field
+    await user.save();
+    res.redirect('/profile');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 
 app.get("/login", (req, res) => {
   res.render("login");
@@ -65,7 +87,7 @@ app.post("/login", async (req, res) => {
     }
     const token = jwt.sign({ user }, 'protect');
     res.cookie('token', token);
-    res.status(200).send('Logged In Successfully');
+    res.status(200).redirect('/profile');
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
@@ -81,7 +103,7 @@ function isLoggedIn(req, res, next) {
   try {
     const token = req.cookies.token;
     if (!token) {
-      return res.status(401).send("You must be logged in");
+      res.redirect('/login')
     }
     const decoded = jwt.verify(token, 'protect');
     req.user = decoded.user;
