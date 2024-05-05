@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="flex justify-center items-center h-screen">
+        <div class="bg-zinc-900 text-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <h3 class="text-3xl text-center mb-4">SignUp Form</h3>
+          <form action="/register" method="post" class="flex flex-col space-y-4">
+            <input class="px-3 py-2 outline-none bg-transparent" type="text" placeholder="username" name="username" />
+            <input class="px-3 py-2 outline-none bg-transparent" type="password" placeholder="password" name="password" />
+            <input class="px-3 py-2 outline-none bg-transparent" type="text" placeholder="name" name="name" />
+            <input class="px-3 py-2 outline-none bg-transparent" type="number" placeholder="age" name="age" />
+            <input class="px-3 py-2 outline-none bg-transparent" type="email" placeholder="email" name="email" />
+            <input class="px-3 py-2 outline-none bg-sky-600 hover:bg-blue-400 cursor-pointer w-full" type="submit" value="Create Account">
+          </form>
+        </div>
+      </div>
+      
+      
+  </body>
+</html>
