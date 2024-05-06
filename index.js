@@ -7,6 +7,7 @@ const postModel = require("./models/post");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
+const user = require("./models/user");
 
 // Set up view engine
 app.set("view engine", "ejs");
@@ -20,6 +21,49 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.render("index");
 });
+
+app.get("/like/:id", isLoggedIn, async(req, res) => {
+  let post = await postModel.findOne({_id:req.params.id}).populate('user');
+  if(post.likes.indexOf(req.user._id)===-1){
+    post.likes.push(req.user._id)
+  }
+  else{
+    post.likes.splice(post.likes.indexOf(req.user._id),1)
+  }
+ 
+   await post.save();
+  res.redirect('/profile' );
+});
+
+app.get("/edit/:id", isLoggedIn, async(req, res) => {
+  let post = await postModel.findOne({_id:req.params.id}).populate('user');
+  
+  res.render('edit' , {post} );
+});
+
+app.post("/updatePost/:id", isLoggedIn, async (req, res) => {
+  const postId = req.params.id; // Use req.params.id to get the post ID
+  const updatedContent = req.body.postContent; // Use req.body.postContent to get the updated content
+
+  try {
+      // Find the post by ID and update its content
+      const updatedPost = await postModel.findByIdAndUpdate(postId, { content: updatedContent }, { new: true });
+
+      // Redirect to profile page after successful update
+      res.redirect('/profile');
+  } catch (error) {
+      // Handle errors appropriately
+      console.error("Error updating post:", error);
+      res.status(500).send("Error updating post. Please try again later.");
+  }
+});
+
+
+  
+
+
+
+
 
 app.get("/profile", isLoggedIn, async(req, res) => {
   let user = await userModel.findOne({email:req.user.email}).populate('post')
